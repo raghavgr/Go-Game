@@ -16,57 +16,67 @@ class Grid():
     def __init__(self, size, nodepairs):
         super().__init__()
 
-        # This was the error
-        #self.board = [[Node.EMPTY] * size] * size
         self.board = [[Node.EMPTY for i in range(size)] for j in range(size)]
         self.size = size
         for node in nodepairs:
-            self.board[node[0][0]][node[0][1]] = node[1]
+            self.setVal(self.board, node[0], node[1])
+
+    def get(self, arr, location):
+        return arr[location[0]][location[1]]
+
+    def setVal(self, arr, location, value):
+
+        arr[location[0]][location[1]] = value
 
     def isCaptured(self, location):
+        if (self.get(self.board, location) == Node.WHITE):
+            return False
         if self.isntOut(location):
             q = deque()
             q.appendleft(location)
-
-            # This was also the error
-            #visited = [[False] * self.size] * self.size
             visited = [[False for i in range(self.size)]
                        for j in range(self.size)]
-
-            visited[location[0]][location[1]] = True
+            self.setVal(visited, location, True)
             while len(q) != 0:
                 curr = q.popleft()
-                visited[curr[0]][curr[1]] = True
-                neighbors = [[curr[0], curr[1]+1], [curr[0], curr[1]-1],
-                             [curr[0]+1, curr[1]], [curr[0]-1, curr[1]]]
-                for i in neighbors:
-                    if self.isntOut(i):
-                        if not visited[i[0]][i[1]]:
-                            if self.board[i[0]][i[1]] == Node.WHITE:
-                                visited[i[0]][i[1]] = True
-                                continue
-                            elif self.board[i[0]][i[1]] == Node.EMPTY:
-                                return False
-                            elif self.board[i[0]][i[1]] == Node.BLACK:
-                                q.append(i)
-                    else:
-                        continue
+                self.setVal(visited, curr, True)
+                if self.isSurrounded(q, visited, curr):
+                    continue
+                else:
+                    return False
             return True
         else:
             return False
 
     def isntOut(self, location):
         if (location[0] >= 0 and location[0] < self.size and location[1] >= 0 and location[1] < self.size):
-            # print(str(location) + " isn't out ")
             return True
         return False
+
+    def isSurrounded(self, q, visited, curr):
+        neighbors = [[curr[0], curr[1]+1], [curr[0], curr[1]-1],
+                     [curr[0]+1, curr[1]], [curr[0]-1, curr[1]]]
+        for loc in neighbors:
+            if self.isntOut(loc):
+                if not self.get(visited, loc):
+
+                    if self.get(self.board, loc) == Node.WHITE:
+                        self.setVal(visited, loc, True)
+                        continue
+                    elif self.get(self.board, loc) == Node.EMPTY:
+                        return False
+                    elif self.get(self.board, loc) == Node.BLACK:
+                        q.append(loc)
+            else:
+                continue
+        return True
 
 
 if __name__ == "__main__":
     newGrid = Grid(5, [([1, 3], Node.WHITE),
                        ([1, 2], Node.WHITE),
                        ([3, 3], Node.WHITE),
-                       ([3, 2], Node.WHITE),
+                       ([3, 2], Node.EMPTY),
                        ([2, 1], Node.WHITE),
                        ([2, 4], Node.WHITE),
                        ([2, 2], Node.BLACK),
