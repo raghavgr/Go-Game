@@ -1,6 +1,6 @@
 import unittest
-from capturedGrid import Grid
-from capturedGrid import Node
+from gridGo import Grid
+from gridGo import Node
 
 
 class TestGridGo(unittest.TestCase):
